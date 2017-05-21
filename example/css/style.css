@@ -1,0 +1,12 @@
+﻿/* Center the demo */
+ 
+
+body {
+    background-color:#fff;
+    padding:0px;
+    margin:0px;
+}
+h1{
+    border-bottom: 1px solid #cccccc;
+    text-align: center;
+}
