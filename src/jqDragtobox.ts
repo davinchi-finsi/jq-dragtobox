@@ -22,256 +22,208 @@ $.widget("hz.dragtobox", {
     CLASS_ELEMENT_PLACED: 'hz-dragtobox__element--placed',
     CLASS_ELEMENT_STATE_OK: 'hz-dragtobox__element--ok',
     CLASS_ELEMENT_STATE_KO: 'hz-dragtobox__element--ko',
-
+    CLASS_ORIGIN:"hz-dragtobox__origin",
+    
     QUERY_BOX: '.hz-dragtobox__box',
-    QUERY_ELEMENT: '.hz_dragtobox__element',
-    QUERY_ELEMENTS: '.hz_dragtobox__elements',
+    QUERY_ELEMENT: '.hz-dragtobox__element',
+    QUERY_ELEMENTS: '.hz-dragtobox__elements',
     QUERY_ELEMENT_STATE_KO: '.hz-dragtobox__element--ko',
     QUERY_ELEMENT_STATE_OK: '.hz-dragtobox__element--ok',
-    QUERY_ELEMENT_PLACED: 'hz-dragtobox__element--placed',
-
-
-    ATTR_BOX_TITLE: 'data-hz-dragtobox__box--title',
-    ATTR_BOX_IMAGE: 'data-hz-dragtobox__box--image',
-    ATTR_BOX_ID: 'data-hz-dragtobox__box--id',
-    ATTR_ELEMENT_ID: 'data-hz-dragtobox__element--id',
-
-    // Default options.
+    QUERY_ELEMENT_PLACED: '.hz-dragtobox__element--placed',
+    QUERY_ORIGIN:".hz-dragtobox__origin",
+    // Default options
     options: {
-        immediate_feedback: true,
-        classes: {
-            'hz-dragtobox': 'hz-dragtobox--default',
-            'hz-dragtobox__box': 'hz-dragtobox__box'
-        }
+        origin:".hz-dragtobox__origin",
+        boxes:".hz-dragtobox__box",
+        elements:".hz-dragtobox__element",
+        allowDropInInvalid:true,
+        mirrorContainer: document.body
     },
     /**
      * @memberof dragtobox
-     * FunciÃ³n de creaciÃ³n del widget
+     * Función de creación del widget
      * @function
      */
     _create: function () {
-        //Var declaration globales
-        this._boxes = [];
-        this._elements = [];
-        //
-        this._buildHtml();
     },
     /**
      * Inicia el componente
      */
     _init: function () {
+        this._correct = 0;
+        this._boxes = [];
+        this._elements = [];
+        this._getElements();
+        this._parseItems();
+        this._start();
     },
-
-    _buildHtml: function () {
-        // obtenemos todos los box que hay
-        var _boxes = this.element.find(this.QUERY_BOX);
-        // Si no existe ningÃºn box lanzamos un error
-        if (_boxes.length == 0) {
-            throw 'No se ha encontrado ningunna caja. Necesitas usar la clase ' + this.QUERY_BOX;
+    _getElements : function(){
+        this._$boxes = this.element.find(this.options.boxes);
+        if(this._$boxes.length < 1){
+            throw 'No se ha encontrado ningunna caja de destino. Necesitas usar la clase ' + this.CLASS_BOX;
         }
-        else {
-            var idElement = 0;
+        this._$origin = this.element.find(this.options.origin);
+        if(this._$origin.length < 1){
+            throw 'No se ha encontrado ningunna caja de origen. Necesitas usar la clase ' + this.CLASS_ORIGIN;
+        }
+        this._$boxes.addClass(this.CLASS_BOX);
+        this._$origin.addClass(this.CLASS_ORIGIN);
+    },
+    _parseItems: function () {
+        let idElement = 0;
 
-            //Recorremos los box
-            for (var boxIndex = 0; boxIndex < _boxes.length; boxIndex++) {
-                var currentBox = $(_boxes[boxIndex]);
-                var boxTitle = currentBox.attr(this.ATTR_BOX_TITLE) || '';
-                var boxImage = currentBox.attr(this.ATTR_BOX_IMAGE) || '';
-                var _elements = currentBox.find(this.QUERY_ELEMENT);
-                var _elementsInBox = [];
+        //Recorremos los box
+        for (let boxIndex = 0; boxIndex < this._$boxes.length; boxIndex++) {
+            let currentBox = $(this._$boxes[boxIndex]);
+            let _elements = currentBox.find(this.options.elements);
+            let _elementsInBox = [];
 
-                currentBox
-                    .addClass('ui-droppable')
-                    .attr(this.ATTR_BOX_ID, boxIndex);
-
-                for (var elementIndex = 0; elementIndex < _elements.length; elementIndex++) {
-                    var currentElement = $(_elements[elementIndex]);
-                    var newElement = {
-                        'idElement': idElement,
-                        'idBox': boxIndex,
-                        'content': currentElement.text(),
-                        '$element': currentElement
-                    };
-
-                    this._elements.push(newElement);
-                    _elementsInBox.push(newElement);
-                    idElement++;
-                    currentElement.remove();
-                }
-
-                var newBox = {
+            for (let elementIndex = 0; elementIndex < _elements.length; elementIndex++) {
+                let currentElement = $(_elements[elementIndex]).detach();
+                let newElement = {
+                    'idElement': idElement,
                     'idBox': boxIndex,
-                    'title': boxTitle,
-                    'image': boxImage,
-                    '$box': currentBox,
-                    'elements': _elementsInBox
+                    '$element': currentElement,
+                    'isCorrect':null
                 };
-                this._boxes.push(newBox);
+                this._elements.push(newElement);
+                _elementsInBox.push(newElement);
+                idElement++;
             }
-            this._drawElementsToDrag();
+            let newBox = {
+                'idBox': boxIndex,
+                '$box': currentBox,
+                'elements': _elementsInBox,
+                '$elements':_elements
+            };
+            this._boxes.push(newBox);
         }
     },
-
-    /*
-     * Pintamos los elementos (palabras o imÃ¡genes) disponibles para colocar en los box
-     */
-    _drawElementsToDrag: function () {
-
-        // creamos el contenedor donde irÃ¡n ubicados los elementos
-        var html = $('<div class="' + this.CLASS_ELEMENTS + '"></div>');
-        var arrElements = this._shuffleArray(this._elements);
-        // recorremos los elementos que tenemos almacenados
-        for (var elementIndex = 0; elementIndex < arrElements.length; elementIndex++) {
-            var currentElement = arrElements[elementIndex];
-            var $element = $("<div class=\"" + this.CLASS_ELEMENT + " box_" + currentElement.idBox + "  ui-draggable\" " + this.ATTR_ELEMENT_ID + "=\"" + currentElement.idElement + "\">" + currentElement.content + "</div>");
-            $element.data("elementId", currentElement.idElement);
-            currentElement.$element = $element;
-            html.append($element);
+    _getElementsOf:function(items = []){
+        let result = [];
+        for (let itemIndex = 0, itemsLength = items.length; itemIndex < itemsLength; itemIndex++) {
+            let currentItem = items[itemIndex];
+            result.push(currentItem.$element);
         }
-        // las aÃ±adimos al elemento principal
-        this.element.prepend(html);
-
-        this._createEvents();
+        return $.makeArray(result);
     },
-
-    _createEvents: function () {
-        var that = this;
-
-        //listener click en elementos fallidas
-        //that.element.off('click.' + this.NAMESPACE)
-        //    .on('click.' + this.NAMESPACE, this.QUERY_ELEMENT_STATE_KO, { instance: this, that:that }, this._onKoElementClick);
-
-
-        // habilitamos que las elementos se puedan mover
-        that.element.find('.hz-dragtobox__element')
-            .draggable({
-                //revert: "invalid",
-                start: function( event, ui ) {
-                    ui.helper.removeClass(that.CLASS_ELEMENT_STATE_OK).removeClass(that.CLASS_ELEMENT_STATE_KO);
-                },
-                containment: ".hz-dragtobox"//this.QUERY_BOX
-            });
-
-        // habilitamos que los box puedan recibir elementos
-        that.element.find(this.QUERY_BOX)
-            .droppable({
-                hoverClass: this.CLASS_BOX_HOVER,
-                drop: function (event, ui) {
-                    that._handleDrop(event, ui, this);
+    _start : function(){
+        this._$origin.append(this._getElementsOf(this._shuffleArray(this._elements)));
+        this._dragulaInstance = dragula(this._$origin.toArray().concat(this._$boxes.toArray()),{
+            isContainer: this._isContainer.bind(this),
+            moves: this._moves.bind(this),
+            accepts: this._accepts.bind(this),
+            invalid: this._invalid.bind(this),
+            revertOnSpill: true,              // spilling will put the element back where it was dragged from, if this is true
+            mirrorContainer: this.options.mirrorContainer,    // set the element that gets mirror elements appended
+        });
+        this._assignEvents();
+    },
+    _isContainer:function(el){
+        return $(el).hasClass(this.CLASS_BOX);
+    },
+    _moves: function(el, source, handle, sibling){
+        return true;
+    },
+    _accepts: function (el, target, source, sibling) {
+        let allow = false;
+        if(!this._$origin.is(target)){
+            if(this.options.allowDropInInvalid != true){
+                let boxes = this._boxes;
+                //por cada caja
+                allow = this._validate(el,target);
+            }else{
+                allow = true;
+            }
+        }
+        return allow;
+    },
+    _invalid: function (el, handle) {
+        return this.options.disabled || !$(el).hasClass(this.CLASS_ELEMENT);
+    },
+    _assignEvents:function(){
+        this._dragulaInstance.on("drop",this._onDrop.bind(this));
+    },
+    _onDrop:function(el, target, source, sibling){
+        let isCorrect = this._validate(el,target),
+            $el = $(el),
+            element = this._elements[this._getElementIndexFor($el)];
+        if(isCorrect){
+            $el.removeClass(this.CLASS_ELEMENT_STATE_KO);
+            $el.addClass(this.CLASS_ELEMENT_STATE_OK);
+            if(element.isCorrect != true){
+                this._correct++;
+            }
+        }else{
+            $el.removeClass(this.CLASS_ELEMENT_STATE_OK);
+            $el.addClass(this.CLASS_ELEMENT_STATE_KO);
+            if(element.isCorrect == true){
+                this._correct--;
+            }
+        }
+        element.isCorrect = isCorrect;
+        if(this._correct == this._elements.length){
+            this._end();
+        }
+    },
+    _end:function(){
+        this.element.trigger(this.ON_DRAGTOBOX_COMPLETED);
+    },
+    _getBoxIndexFor:function($box){
+        let boxes = this._boxes,
+            result = -1;
+        for (let boxIndex = 0, boxesLength = boxes.length; boxIndex < boxesLength; boxIndex++) {
+            let currentBox = boxes[boxIndex];
+            if(currentBox.$box.is($box)){
+                result = boxIndex;
+                boxIndex = boxesLength;
+            }
+        }
+        return result;
+    },
+    _getElementIndexFor:function($element,box?){
+        let result = -1;
+        if(box) {
+            result = box.$elements.index($element);
+        }else{
+            let elements = this._elements;
+            for (let elementIndex = 0, elementsLength = elements.length; elementIndex < elementsLength; elementIndex++) {
+                let currentElement = elements[elementIndex];
+                if($element.is(currentElement.$element)){
+                    result = elementIndex;
+                    elementIndex = elementsLength
                 }
-                /*,
-                accept:function (ui) {
-
-                    let idBox=$(this).attr('data-hz-dragtobox__box--id');
-                    if(idBox==1){
-                        return true;
-                    }
-
-                }*/
-            });
-    },
-
-
-    _handleDrop: function (event, ui, _this) {
-        if (!this.isDisabled()) {
-            var $element = ui.helper;
-            var $box = $(_this);
-
-            var elementId = $element.data("elementId");
-            var idBox = $box.attr(this.ATTR_BOX_ID);
-            var element = this._getElementById(elementId);
-
-            $element.removeClass(this.CLASS_ELEMENT_STATE_OK).removeClass(this.CLASS_ELEMENT_STATE_KO);
-
-            // comprobamos si ha acertado
-            var evaluate = this.ELEMENT_STATE.KO;
-
-            if (element.idBox == idBox) {
-                evaluate = this.ELEMENT_STATE.OK;
-                $element.draggable( "disable" );
-            }
-
-            // colocamos la palabra en el hueco
-            $element.addClass(this.CLASS_ELEMENT_PLACED)
-                .addClass(evaluate === this.ELEMENT_STATE.OK ? this.CLASS_ELEMENT_STATE_OK : this.CLASS_ELEMENT_STATE_KO).text(element.content);
-            $box.data("currentElement", elementId);
-
-            $element.css( {left:'', top:'', position:'' });
-            $box.append($element);
-
-            $element.moved = true;
-            // evaluamos si se ha terminado el ejercicio
-            this._numberElementsPlaced = this.element.find('.hz-dragtobox__element--placed').length;
-            this._numberElementsOK = this.element.find(this.QUERY_ELEMENT_STATE_OK).length;
-
-            if (this._numberElementsPlaced == this._elements.length) {
-                this.element.trigger(this.ON_DRAGTOBOX_COMPLETED);
-            }
-
-            if (this._numberElementsOK == this._elements.length) {
-                this.element.trigger(this.ON_DRAGTOBOX_OK);
-                this.element.find(this.QUERY_ELEMENTS)
-                    .remove();
             }
         }
-        else {
-            event.preventDefault();
-        }
+        return result;
     },
-
-    _onKoElementClick: function (e) {
-
-        var instance = e.data.instance;
-
-        if (!instance.isDisabled()) {
-            var $element = $(e.target);
-            $element.removeClass(instance.CLASS_ELEMENT_STATE_KO + " " + instance.CLASS_ELEMENT_PLACED);
-
-            var _elements = instance.element.find('.hz_dragtobox__elements');
-
-            _elements.append($element);
-
-            $element.moved = false;
+    _validate:function(el,box){
+        let boxIndex = this._getBoxIndexFor($(box)),
+            result = false;
+        if(boxIndex != -1){
+            let box = this._boxes[boxIndex],
+                elemIndex = this._getElementIndexFor($(el),box);
+            result = elemIndex != -1;
         }
-    },
-
-    disable: function () {
-        this._super();
-        this.element.find(this.QUERY_ELEMENT).draggable("disable");
-        this.element.find(this.QUERY_BOX).droppable("disable");
+        return result;
     },
     isDisabled: function () {
         return this.options.disabled;
     },
-    enable: function () {
-        this._super();
-        this._words = this.element.find(this.QUERY_BOX);
-        this.element.find(this.QUERY_ELEMENT).draggable("enable");
-        this.element.find(this.QUERY_BOX).droppable("enable");
-    },
-
-    /*
-     * Obtiene la palabra que corresponde al hueco de destino seleccionado
-     */
-    _getElementById: function (id) {
-        var elements = this._elements, result;
-        for (var elementIndex = 0; elementIndex < elements.length; elementIndex++) {
-            var currentElement = elements[elementIndex];
-            if (id == currentElement.idElement) {
-                result = currentElement;
-                elementIndex = elements.length;
-            }
+    destroy:function(){
+        if(this._dragulaInstance){
+            this._dragulaInstance.destroy();
         }
-        return result;
+        this._super();
     },
     /*
      *  Devuelve un orden aleatorio del array que se le pasa
      *  @params array
      */
     _shuffleArray: function (array) {
-        for (var positionIndex = array.length - 1; positionIndex > 0; positionIndex--) {
-            var j = Math.floor(Math.random() * (positionIndex + 1));
-            var temp = array[positionIndex];
+        for (let positionIndex = array.length - 1; positionIndex > 0; positionIndex--) {
+            let j = Math.floor(Math.random() * (positionIndex + 1));
+            let temp = array[positionIndex];
             array[positionIndex] = array[j];
             array[j] = temp;
         }

@@ -1,45 +1,48 @@
 ﻿<!DOCTYPE html>
 <html>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>jq-Dragtobox</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
-    <link href="../dist/assets/styles/dragtobox.css" rel="stylesheet" />
-    <link href="css/style.css" rel="stylesheet" />
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title>jq-Dragtobox</title>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css"/>
+        <script src="../node_modules/jquery/dist/jquery.js"></script>
+        <script src="../node_modules/jquery-ui/ui/widget.js"></script>
+        <script src="../node_modules/dragula/dist/dragula.js"></script>
+        <link href="../dist/assets/styles/dragtobox.css" rel="stylesheet"/>
+        <link href="../node_modules/dragula/dist/dragula.css" rel="stylesheet"/>
+        <link href="css/style.css" rel="stylesheet"/>
 
 
+    </head>
+    <body>
 
-</head>
-<body>
+        <h1>hz-dragtobox</h1>
 
-<h1>hz-dragtobox</h1>
+        <div class="hz-dragtobox">
+            <div class="hz-dragtobox__origin"></div>
+            <div class="hz-dragtobox__box">
+                <h1>Name box 1</h1>
+                <span class="hz-dragtobox__element">Box 1</span>
+                <span class="hz-dragtobox__element">Box 1</span>
+            </div>
 
-<div class="hz-dragtobox">
-
-    <div class="hz-dragtobox__box">
-        <h1>Name box 1</h1>
-        <span class="hz_dragtobox__element">Box 1</span>
-        <span class="hz_dragtobox__element">Box 1</span>
-    </div>
-
-    <div class="hz-dragtobox__box">
-        <h1>Name box 2</h1>
-        <span class="hz_dragtobox__element">Box 2</span>
-        <span class="hz_dragtobox__element">Box 2</span>
-    </div>
-
-
-</div>
+            <div class="hz-dragtobox__box">
+                <h1>Name box 2</h1>
+                <span class="hz-dragtobox__element">Box 2</span>
+                <span class="hz-dragtobox__element">Box 2</span>
+            </div>
 
 
-<script src="../dist/jqDragtobox.js"></script>
-    <script>
-       $(".hz-dragtobox").dragtobox({});
-    </script>
-</body>
+        </div>
+
+
+        <script src="../dist/jqDragtobox.js"></script>
+        <script>
+            $(".hz-dragtobox")
+                .dragtobox({
+                   //allowDropInInvalid:false
+                }).dragtobox("disable");
+        </script>
+    </body>
 </html>
