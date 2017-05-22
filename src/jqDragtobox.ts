@@ -14,6 +14,7 @@ $.widget("hz.dragtobox", {
     ON_DRAGTOBOX_OVER: 'dragtobox:over',
     ON_DRAGTOBOX_COMPLETED: 'dragtobox:completed',
     ON_DRAGTOBOX_OK: 'dragtobox:ok',
+
     CLASS_BOX: 'hz-dragtobox__box',
     CLASS_BOX_HOVER: 'hz-dragtobox__box--hover',
     CLASS_ELEMENT: 'hz-dragtobox__element',
@@ -21,34 +22,20 @@ $.widget("hz.dragtobox", {
     CLASS_ELEMENT_PLACED: 'hz-dragtobox__element--placed',
     CLASS_ELEMENT_STATE_OK: 'hz-dragtobox__element--ok',
     CLASS_ELEMENT_STATE_KO: 'hz-dragtobox__element--ko',
-    //CLASS_GAP_DESTINY: 'hz-dragtobox__gap--destiny',
-    //CLASS_GAP_EMPTY: 'hz-dragtobox__gap--empty',
-    //CLASS_GAP_ORIGIN: 'hz-fill-gaps-gaps_origin',
-    //CLASS_GAP_HOVER_DESTINY:'hover_destiny',
-    //CLASS_ELEMENT_PLACED:'hz-dragtobox__gap--filled',
-    //CLASS_GAP_STATE_OK:'hz-dragtobox__gap--ok',
-    //CLASS_ELEMENT_STATE_KO:'hz-dragtobox__gap--ko',
+
     QUERY_BOX: '.hz-dragtobox__box',
     QUERY_ELEMENT: '.hz_dragtobox__element',
     QUERY_ELEMENTS: '.hz_dragtobox__elements',
     QUERY_ELEMENT_STATE_KO: '.hz-dragtobox__element--ko',
     QUERY_ELEMENT_STATE_OK: '.hz-dragtobox__element--ok',
     QUERY_ELEMENT_PLACED: 'hz-dragtobox__element--placed',
-    //QUERY_GAP_ORIGIN: '.hz-fill-gaps-gap_origin',
-    //QUERY_BOX: '.hz-dragtobox__gap--destiny',
-    //QUERY_ELEMENT:'.hz-dragtobox__word',
-    //QUERY_ELEMENTS:'.hz-dragtobox__words',
-    //QUERY_GAP_FILLED:'.hz-dragtobox__gap--filled',
-    //QUERY_GAP_STATE_OK:'.hz-dragtobox__gap--ok',
-    //QUERY_GAP_STATE_KO:'.hz-dragtobox__gap--ko',
-    //
+
+
     ATTR_BOX_TITLE: 'data-hz-dragtobox__box--title',
     ATTR_BOX_IMAGE: 'data-hz-dragtobox__box--image',
     ATTR_BOX_ID: 'data-hz-dragtobox__box--id',
     ATTR_ELEMENT_ID: 'data-hz-dragtobox__element--id',
-    //ATTR_GAP_WORD:'data-hz-dragtobox-word',
-    //ATTR_GAP_DESTINY:'data-hz-dragtobox-gap-destiny',
-    //ATTR_GAP_LENGTH: 'data-hz-dragtobox-gap-lenght',
+
     // Default options.
     options: {
         immediate_feedback: true,
@@ -116,13 +103,14 @@ $.widget("hz.dragtobox", {
                 };
                 this._boxes.push(newBox);
             }
-            this._drawBoxes();
+            this._drawElementsToDrag();
         }
     },
+
     /*
      * Pintamos los elementos (palabras o imÃ¡genes) disponibles para colocar en los box
      */
-    _drawBoxes: function () {
+    _drawElementsToDrag: function () {
 
         // creamos el contenedor donde irÃ¡n ubicados los elementos
         var html = $('<div class="' + this.CLASS_ELEMENTS + '"></div>');
@@ -130,7 +118,7 @@ $.widget("hz.dragtobox", {
         // recorremos los elementos que tenemos almacenados
         for (var elementIndex = 0; elementIndex < arrElements.length; elementIndex++) {
             var currentElement = arrElements[elementIndex];
-            var $element = $("<div class=\"" + this.CLASS_ELEMENT + " ui-draggable\" " + this.ATTR_ELEMENT_ID + "=\"" + currentElement.idElement + "\">" + currentElement.content + "</div>");
+            var $element = $("<div class=\"" + this.CLASS_ELEMENT + " box_" + currentElement.idBox + "  ui-draggable\" " + this.ATTR_ELEMENT_ID + "=\"" + currentElement.idElement + "\">" + currentElement.content + "</div>");
             $element.data("elementId", currentElement.idElement);
             currentElement.$element = $element;
             html.append($element);
@@ -166,6 +154,15 @@ $.widget("hz.dragtobox", {
                 drop: function (event, ui) {
                     that._handleDrop(event, ui, this);
                 }
+                /*,
+                accept:function (ui) {
+
+                    let idBox=$(this).attr('data-hz-dragtobox__box--id');
+                    if(idBox==1){
+                        return true;
+                    }
+
+                }*/
             });
     },
 
