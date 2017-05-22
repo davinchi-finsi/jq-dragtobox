@@ -71,6 +71,7 @@ $.widget("hz.dragtobox", {
         }
         else {
             var idElement = 0;
+
             //Recorremos los box
             for (var boxIndex = 0; boxIndex < _boxes.length; boxIndex++) {
                 var currentBox = $(_boxes[boxIndex]);
@@ -78,9 +79,11 @@ $.widget("hz.dragtobox", {
                 var boxImage = currentBox.attr(this.ATTR_BOX_IMAGE) || '';
                 var _elements = currentBox.find(this.QUERY_ELEMENT);
                 var _elementsInBox = [];
+
                 currentBox
                     .addClass('ui-droppable')
                     .attr(this.ATTR_BOX_ID, boxIndex);
+
                 for (var elementIndex = 0; elementIndex < _elements.length; elementIndex++) {
                     var currentElement = $(_elements[elementIndex]);
                     var newElement = {
@@ -89,11 +92,13 @@ $.widget("hz.dragtobox", {
                         'content': currentElement.text(),
                         '$element': currentElement
                     };
+
                     this._elements.push(newElement);
                     _elementsInBox.push(newElement);
                     idElement++;
                     currentElement.remove();
                 }
+
                 var newBox = {
                     'idBox': boxIndex,
                     'title': boxTitle,
@@ -191,7 +196,7 @@ $.widget("hz.dragtobox", {
                 .addClass(evaluate === this.ELEMENT_STATE.OK ? this.CLASS_ELEMENT_STATE_OK : this.CLASS_ELEMENT_STATE_KO).text(element.content);
             $box.data("currentElement", elementId);
 
-            $element.css( {left:0, top:0, position:"inherit" });
+            $element.css( {left:'', top:'', position:'' });
             $box.append($element);
 
             $element.moved = true;
